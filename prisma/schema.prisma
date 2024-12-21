@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int             @id @default(autoincrement())
+  username    String          @unique
+  email       String          @unique
+  password    String
+  avatar      String?
+  bio         String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  posts       Post[]
+  communities CommunityUser[]
+  comments    Comment[]
+  likes       Like[]
+  friends     Friendship[]    @relation("UserAsUser")
+  friendOf    Friendship[]    @relation("UserAsFriend")
+}
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String
+  status      String
+  mediaUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  communityId Int
+  userId      Int
+  tagId       Int?
+  author      User      @relation(fields: [userId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+  comments    Comment[]
+  likes       Like[]
+  tags        Tag?      @relation(fields: [tagId], references: [id])
+  postTags    PostTag[]
+}
+
+model Community {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  slug          String          @unique
+  avatar        String?
+  bio           String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  members       CommunityUser[]
+  posts         Post[]
+  communityTags CommunityTag[]
+}
+
+model CommunityUser {
+  userId      Int
+  communityId Int
+  user        User      @relation(fields: [userId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+
+  @@id([userId, communityId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Tag {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  posts        Post[]
+  PostTag      PostTag[]
+  CommunityTag CommunityTag[]
+}
+
+model PostTag {
+  postId Int
+  tagId  Int
+  post   Post @relation(fields: [postId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
+
+  @@id([postId, tagId])
+}
+
+model CommunityTag {
+  communityId Int
+  tagId       Int
+  community   Community @relation(fields: [communityId], references: [id])
+  tag         Tag       @relation(fields: [tagId], references: [id])
+
+  @@id([communityId, tagId])
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("UserAsUser", fields: [userId], references: [id])
+  friend    User     @relation("UserAsFriend", fields: [friendId], references: [id])
+
+  @@unique([userId, friendId])
+}
