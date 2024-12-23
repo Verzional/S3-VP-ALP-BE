@@ -62,15 +62,6 @@ model Community {
   communityTags CommunityTag[]
 }
 
-model CommunityUser {
-  userId      Int
-  communityId Int
-  user        User      @relation(fields: [userId], references: [id])
-  community   Community @relation(fields: [communityId], references: [id])
-
-  @@id([userId, communityId])
-}
-
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String
@@ -109,6 +100,15 @@ model PostTag {
   tag    Tag  @relation(fields: [tagId], references: [id])
 
   @@id([postId, tagId])
+}
+
+model CommunityUser {
+  userId      Int
+  communityId Int
+  user        User      @relation(fields: [userId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+
+  @@id([userId, communityId])
 }
 
 model CommunityTag {

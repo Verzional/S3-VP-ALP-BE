@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { ResponseError } from "../error/responseError";
+import { ResponseError } from "../error/ResponseError";
 
 // Every error respond from this API will go through this error middleware
 // This middleware will check whether there is an error or not, if an error exists, then return error message
