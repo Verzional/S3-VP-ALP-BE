@@ -20,14 +20,14 @@ model User {
   password    String
   avatar      String?
   bio         String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
   posts       Post[]
   communities CommunityUser[]
   comments    Comment[]
   likes       Like[]
   friends     Friendship[]    @relation("UserAsUser")
   friendOf    Friendship[]    @relation("UserAsFriend")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model Post {
@@ -36,51 +36,50 @@ model Post {
   content     String
   status      String
   mediaUrl    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
   communityId Int
   userId      Int
   tagId       Int?
-  author      User      @relation(fields: [userId], references: [id])
-  community   Community @relation(fields: [communityId], references: [id])
   comments    Comment[]
   likes       Like[]
-  tags        Tag?      @relation(fields: [tagId], references: [id])
   postTags    PostTag[]
+  author      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tags        Tag?      @relation(fields: [tagId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Community {
   id            Int             @id @default(autoincrement())
   name          String          @unique
-  slug          String          @unique
   avatar        String?
   bio           String?
+  posts         Post[]
+  members       CommunityUser[]
+  communityTags CommunityTag[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  members       CommunityUser[]
-  posts         Post[]
-  communityTags CommunityTag[]
 }
 
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   userId    Int
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Like {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   userId    Int
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Tag {
@@ -96,8 +95,8 @@ model Tag {
 model PostTag {
   postId Int
   tagId  Int
-  post   Post @relation(fields: [postId], references: [id])
-  tag    Tag  @relation(fields: [tagId], references: [id])
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([postId, tagId])
 }
@@ -105,8 +104,8 @@ model PostTag {
 model CommunityUser {
   userId      Int
   communityId Int
-  user        User      @relation(fields: [userId], references: [id])
-  community   Community @relation(fields: [communityId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([userId, communityId])
 }
@@ -114,8 +113,8 @@ model CommunityUser {
 model CommunityTag {
   communityId Int
   tagId       Int
-  community   Community @relation(fields: [communityId], references: [id])
-  tag         Tag       @relation(fields: [tagId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([communityId, tagId])
 }
@@ -124,10 +123,8 @@ model Friendship {
   id        Int      @id @default(autoincrement())
   userId    Int
   friendId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation("UserAsUser", fields: [userId], references: [id])
-  friend    User     @relation("UserAsFriend", fields: [friendId], references: [id])
+  user      User     @relation("UserAsUser", fields: [userId], references: [id], onDelete: Cascade)
+  friend    User     @relation("UserAsFriend", fields: [friendId], references: [id], onDelete: Cascade)
 
   @@unique([userId, friendId])
 }
