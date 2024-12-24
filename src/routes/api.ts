@@ -3,10 +3,7 @@ import { UserController } from "../controller/user-controller";  // Sesuaikan de
 
 export const api = express.Router();
 
-const router = express.Router();
+api.post("/register", UserController.register);
+api.post("/login", UserController.login);
 
-router.post("/register", UserController.register);
-
-router.post("/login", UserController.login);
-
-router.post("/logout", UserController.logout);
+api.post("/logout", UserController.logout);
