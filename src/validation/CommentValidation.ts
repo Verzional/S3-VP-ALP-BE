@@ -10,4 +10,12 @@ export class CommentValidation {
   static readonly UPDATE: ZodType = z.object({
     content: z.string().min(1).max(255).optional(),
   });
+
+  static readonly DELETE: ZodType = z.object({
+    id: z.number().int().positive(),
+  });
+
+  static readonly GET: ZodType = z.object({
+    id: z.number().int().positive(),
+  });
 }

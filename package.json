@@ -8,6 +8,9 @@
     "start": "node dist/main.js",
     "dev": "nodemon --watch src --exec ts-node src/main.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

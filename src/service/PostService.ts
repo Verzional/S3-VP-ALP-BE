@@ -39,4 +39,64 @@ export class PostService {
 
     return PostModel.toResponse(post);
   }
+
+  static async update(id: number, request: CreatePostRequest): Promise<PostResponse> {
+    const updateRequest = Validation.validate(PostValidation.UPDATE, request);
+
+    const post = await prismaClient.post.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!post) {
+      throw new ResponseError(404, "Post not found");
+    }
+
+    const updatedPost = await prismaClient.post.update({
+      where: {
+        id,
+      },
+      data: {
+        title: updateRequest.title,
+        content: updateRequest.content,
+      },
+    });
+
+    return PostModel.toResponse(updatedPost);
+  }
+
+  static async delete(id: number): Promise<PostResponse> {
+    const post = await prismaClient.post.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!post) {
+      throw new ResponseError(404, "Post not found");
+    }
+
+    await prismaClient.post.delete({
+      where: {
+        id,
+      },
+    });
+
+    return PostModel.toResponse(post);
+  }
+
+  static async get(id: number): Promise<PostResponse> {
+    const post = await prismaClient.post.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!post) {
+      throw new ResponseError(404, "Post not found");
+    }
+
+    return PostModel.toResponse(post);
+  }
 }

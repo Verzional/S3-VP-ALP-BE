@@ -12,4 +12,22 @@ export class PostValidation {
     title: z.string().min(1).max(255).optional(),
     content: z.string().min(1).max(255).optional(),
   });
+
+  static readonly DELETE: ZodType = z.object({
+    id: z.number().int().positive(),
+  });
+
+  static readonly GET: ZodType = z.object({
+    id: z.number().int().positive(),
+  });
+
+  static readonly GET_BY_USER: ZodType = z.object({
+    userId: z.number().int().positive(),
+  });
+
+  static readonly GET_BY_COMMUNITY: ZodType = z.object({
+    communityId: z.number().int().positive(),
+  });
+
+  static readonly GET_ALL: ZodType = z.object({});
 }

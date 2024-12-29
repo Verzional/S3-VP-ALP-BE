@@ -48,4 +48,40 @@ export class LikeService {
 
     return LikeModel.toResponse(like);
   }
+
+  static async delete(id: number): Promise<void> {
+    const deleteRequest = Validation.validate(LikeValidation.DELETE, { id });
+
+    const like = await prismaClient.like.findUnique({
+      where: {
+        id: deleteRequest.id,
+      },
+    });
+
+    if (!like) {
+      throw new ResponseError(404, "Like not found");
+    }
+
+    await prismaClient.like.delete({
+      where: {
+        id: deleteRequest.id,
+      },
+    });
+  }
+
+  static async get(id: number): Promise<LikeResponse> {
+    const getRequest = Validation.validate(LikeValidation.GET, { id });
+
+    const like = await prismaClient.like.findUnique({
+      where: {
+        id: getRequest.id,
+      },
+    });
+
+    if (!like) {
+      throw new ResponseError(404, "Like not found");
+    }
+
+    return LikeModel.toResponse(like);
+  }
 }

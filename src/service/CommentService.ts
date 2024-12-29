@@ -45,4 +45,64 @@ export class CommentService {
 
     return CommentModel.toResponse(comment);
   }
+
+  static async update(id: number, request: CreateCommentRequest): Promise<CommentResponse> {
+    const updateRequest = Validation.validate(
+      CommentValidation.UPDATE,
+      request
+    );
+
+    const comment = await prismaClient.comment.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!comment) {
+      throw new ResponseError(404, "Comment not found");
+    }
+
+    const updatedComment = await prismaClient.comment.update({
+      where: {
+        id,
+      },
+      data: {
+        content: updateRequest.content,
+      },
+    });
+
+    return CommentModel.toResponse(updatedComment);
+  }
+
+  static async delete(id: number) {
+    const comment = await prismaClient.comment.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!comment) {
+      throw new ResponseError(404, "Comment not found");
+    }
+
+    await prismaClient.comment.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  static async get(id: number): Promise<CommentResponse> {
+    const comment = await prismaClient.comment.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!comment) {
+      throw new ResponseError(404, "Comment not found");
+    }
+
+    return CommentModel.toResponse(comment);
+  }
 }
