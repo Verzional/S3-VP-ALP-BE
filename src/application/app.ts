@@ -1,5 +1,5 @@
 import express from "express"
-import { api } from "../routes/api"
+import { api } from "../routes/API"
 import { errorMiddleware } from "../middleware/ErrorMiddleware"
 
 const app = express()

@@ -4,10 +4,30 @@ export interface PostResponse {
     id: number;
     title: string;
     content: string;
-    mediaUrl?: string | null;
-    communityId: number;
     userId: number;
-    tagId?: number | null;
-    createdAt: Date;
-    updatedAt: Date;
+    communityId: number;
+}
+
+export interface CreatePostRequest {
+    title: string;
+    content: string;
+    userId: number;
+    communityId: number;
+}
+
+export interface UpdatePostRequest {
+    title?: string;
+    content?: string;
+}
+
+export class PostModel {
+    static toResponse(post: Post): PostResponse {
+        return {
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            userId: post.userId,
+            communityId: post.communityId,
+        };
+    }
 }
