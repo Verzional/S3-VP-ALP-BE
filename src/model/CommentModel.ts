@@ -19,3 +19,7 @@ export function toCommentResponse(comment: Comment): CommentResponse {
     updatedAt: comment.updatedAt,
   };
 }
+
+export function toCommentResponses(comments: Comment[]): CommentResponse[] {
+  return comments.map(toCommentResponse);
+}

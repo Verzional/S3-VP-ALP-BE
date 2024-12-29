@@ -13,3 +13,7 @@ export function toLikeResponse(like: Like): LikeResponse {
     postId: like.postId,
   };
 }
+
+export function toLikeResponses(likes: Like[]): LikeResponse[] {
+  return likes.map(toLikeResponse);
+}
