@@ -6,14 +6,22 @@ export interface LikeResponse {
   postId: number;
 }
 
-export function toLikeResponse(like: Like): LikeResponse {
-  return {
-    id: like.id,
-    userId: like.userId,
-    postId: like.postId,
-  };
+export interface CreateLikeRequest {
+  userId: number;
+  postId: number;
 }
 
-export function toLikeResponses(likes: Like[]): LikeResponse[] {
-  return likes.map(toLikeResponse);
+export interface UpdateLikeRequest {
+  userId?: number;
+  postId?: number;
+}
+
+export class LikeModel {
+  static toResponse(like: Like): LikeResponse {
+    return {
+      id: like.id,
+      userId: like.userId,
+      postId: like.postId,
+    };
+  }
 }

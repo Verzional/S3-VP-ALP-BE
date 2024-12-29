@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { CommunityService } from "../service/CommunityService";
+import { CommentService } from "../service/CommentService";
 
-export class CommunityController {
+export class CommentController {
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await CommunityService.create(req.body);
+      const result = await CommentService.create(req.body);
       res.status(201).json({
         status: "success",
         data: result,

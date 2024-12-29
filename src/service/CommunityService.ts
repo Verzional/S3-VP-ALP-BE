@@ -1,24 +1,35 @@
 import { prismaClient } from "../application/Database";
+import { ResponseError } from "../error/ResponseError";
+import { Validation } from "../validation/Validation";
+import { CommunityValidation } from "../validation/CommunityValidation";
 import {
   CommunityModel,
   CommunityResponse,
   CreateCommunityRequest,
 } from "../model/CommunityModel";
-import { CommunityValidation } from "../validation/CommunityValidation";
-import { Validation } from "../validation/Validation";
 
 export class CommunityService {
-  static async createCommunity(
+  static async create(
     request: CreateCommunityRequest
   ): Promise<CommunityResponse> {
-    const CreateCommunityRequest = Validation.validate(
+    const createRequest = Validation.validate(
       CommunityValidation.CREATE,
       request
     );
 
+    const existingCommunity = await prismaClient.community.findFirst({
+      where: {
+        name: createRequest.name,
+      },
+    });
+
+    if (existingCommunity) {
+      throw new ResponseError(400, "Community already exists");
+    }
+
     const community = await prismaClient.community.create({
       data: {
-        name: CreateCommunityRequest.name,
+        name: createRequest.name,
       },
     });
 
