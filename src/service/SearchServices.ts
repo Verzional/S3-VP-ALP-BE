@@ -1,5 +1,5 @@
 import { SearchUser } from '../model/UserModel';
-import { SearchCommunity } from '../model/CommunityModel';
+import { CommunityModel } from '../model/CommunityModel';
 
 class SearchServices {
     async findUserByUsername(username: string): Promise<SearchUser | null> {
@@ -12,9 +12,9 @@ class SearchServices {
         }
     }
 
-    async findCommunityByName(name: string): Promise<SearchCommunity | null> {
+    async findCommunityByName(name: string): Promise<CommunityModel | null> {
         try {
-            const community = await SearchCommunity.find({ name }).limit(1).exec();
+            const community = await CommunityModel.find({ name }).limit(1).exec();
             return community;
         } catch (error) {
             console.error('Error finding community by name:', error);
