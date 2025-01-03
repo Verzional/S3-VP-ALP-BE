@@ -4,6 +4,7 @@ export class PostValidation {
   static readonly CREATE: ZodType = z.object({
     title: z.string().min(1).max(255),
     content: z.string().min(1).max(255),
+    imageUrl: z.string().url().optional(),
     userId: z.number().int().positive(),
     communityId: z.number().int().positive(),
   });
@@ -11,6 +12,7 @@ export class PostValidation {
   static readonly UPDATE: ZodType = z.object({
     title: z.string().min(1).max(255).optional(),
     content: z.string().min(1).max(255).optional(),
+    imageUrl: z.string().url().optional(),
   });
 
   static readonly DELETE: ZodType = z.object({

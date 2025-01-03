@@ -4,6 +4,7 @@ export interface PostResponse {
   id: number;
   title: string;
   content: string;
+  imageUrl?: string;
   userId: number;
   communityId: number;
 }
@@ -11,6 +12,7 @@ export interface PostResponse {
 export interface CreatePostRequest {
   title: string;
   content: string;
+  imageUrl?: string;
   userId: number;
   communityId: number;
 }
@@ -18,6 +20,7 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   title?: string;
   content?: string;
+  linkUrl?: string;
 }
 
 export class PostModel {
@@ -26,6 +29,7 @@ export class PostModel {
       id: post.id,
       title: post.title,
       content: post.content,
+      imageUrl: post.imageUrl ?? undefined,
       userId: post.userId,
       communityId: post.communityId,
     };
