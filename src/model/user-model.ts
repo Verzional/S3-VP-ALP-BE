@@ -9,6 +9,7 @@ export interface RegisterUserRequest {
 
 export interface UserResponse {
     username: string;
+    token?: string
 }
 
 export interface LoginUserRequest {
@@ -57,6 +58,7 @@ export interface Community {
 export function toUserResponse(prismaUser: User): UserResponse {
     return {
         username: prismaUser.username,
+        token: prismaUser.token ?? ""
     };
 }
 

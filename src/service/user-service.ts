@@ -6,7 +6,7 @@ import { RegisterUserRequest, LoginUserRequest, UserResponse, toUserResponse } f
 import { Validation } from "../validation/validation";
 import { UserValidation } from "../validation/user-validation";
 import { ResponseError } from "../error/responseError";
-
+import { v4 as uuid } from "uuid"
 
 export class UserService {
     static async register(request: RegisterUserRequest): Promise<UserResponse> {
@@ -35,6 +35,7 @@ export class UserService {
                 username: validRequest.username,
                 email: validRequest.email,
                 password: validRequest.password,
+                token: uuid()
             },
         });
 
@@ -42,31 +43,53 @@ export class UserService {
     }
 
     static async login(request: LoginUserRequest): Promise<UserResponse> {
-        const validRequest = Validation.validate(UserValidation.LOGIN, request);
+        const loginRequest = Validation.validate(UserValidation.LOGIN, request)
 
-        const user = await prismaClient.user.findUnique({
-            where: { email: validRequest.email },
-        });
+        let user = await prismaClient.user.findFirst({
+            where: {
+                email: loginRequest.email,
+            },
+        })
 
         if (!user) {
-            throw new ResponseError(400, "Invalid email or password");
+            throw new ResponseError(400, "Invalid email or password!")
         }
 
         const passwordIsValid = await bcrypt.compare(
-            validRequest.password,
+            loginRequest.password,
             user.password
-        );
+        )
 
         if (!passwordIsValid) {
-            throw new ResponseError(400, "Invalid email or password");
+            throw new ResponseError(400, "Invalid email or password!")
         }
 
-        return toUserResponse(user);
+        user = await prismaClient.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                token: uuid(),
+            },
+        })
+
+        const response = toUserResponse(user)
+
+        return response
     }
 
 
-    static async logout(user: { id: number }): Promise<string> {
-        return "Logout successful";
+    static async logout(user: User): Promise<string> {
+        const result = await prismaClient.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                token: null,
+            },
+        })
+
+        return "Logout Successful!"
     }
 
     static async createUserProfile(userId: number, avatar: string, bio: string) {
