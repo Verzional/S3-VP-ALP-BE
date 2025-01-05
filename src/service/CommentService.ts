@@ -92,17 +92,23 @@ export class CommentService {
     });
   }
 
-  static async get(id: number): Promise<CommentResponse> {
-    const comment = await prismaClient.comment.findUnique({
+  static async getAllByPost(postId: number): Promise<CommentResponse[]> {
+    const post = await prismaClient.post.findUnique({
       where: {
-        id,
+        id: postId,
       },
     });
 
-    if (!comment) {
-      throw new ResponseError(404, "Comment not found");
+    if (!post) {
+      throw new ResponseError(404, "Post not found");
     }
 
-    return CommentModel.toResponse(comment);
+    const comments = await prismaClient.comment.findMany({
+      where: {
+        postId,
+      },
+    });
+
+    return comments.map((comment) => CommentModel.toResponse(comment));
   }
 }

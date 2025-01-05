@@ -23,9 +23,21 @@ export class LikeController {
     }
   }
 
-  static async get(req: Request, res: Response, next: NextFunction) {
+  static async getAllByPost(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await LikeService.get(Number(req.params.id));
+      const result = await LikeService.getAllByPost(Number(req.params.id));
+      res.json({
+        status: "success",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAllByUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await LikeService.getAllByUser(Number(req.params.id));
       res.json({
         status: "success",
         data: result,

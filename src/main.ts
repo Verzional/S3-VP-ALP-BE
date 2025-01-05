@@ -1,6 +1,8 @@
 import app from "./application/App";
 import { logger } from "./application/Logging";
 
-app.listen(3000, () => {
-  logger.info("Listening on http://localhost:3000");
+const PORT = 3000
+
+app.listen(PORT, () => {
+  logger.info(`Listening on http://localhost:${PORT}`);
 });

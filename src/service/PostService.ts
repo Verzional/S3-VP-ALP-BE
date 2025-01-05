@@ -32,6 +32,7 @@ export class PostService {
       data: {
         title: createRequest.title,
         content: createRequest.content,
+        imageUrl: createRequest.imageUrl,
         userId: createRequest.userId,
         communityId: createRequest.communityId,
       },
@@ -98,5 +99,11 @@ export class PostService {
     }
 
     return PostModel.toResponse(post);
+  }
+
+  static async getAll(): Promise<PostResponse[]> {
+    const posts = await prismaClient.post.findMany();
+
+    return posts.map((post) => PostModel.toResponse(post));
   }
 }

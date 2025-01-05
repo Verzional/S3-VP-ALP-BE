@@ -33,11 +33,11 @@ export class CommentController {
     } catch (error) {
       next(error);
     }
-  }
+  }  
 
-  static async get(req: Request, res: Response, next: NextFunction) {
+  static async getAllByPost(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await CommentService.get(Number(req.params.id));
+      const result = await CommentService.getAllByPost(Number(req.params.id));
       res.json({
         status: "success",
         data: result,

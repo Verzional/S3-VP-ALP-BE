@@ -69,19 +69,23 @@ export class LikeService {
     });
   }
 
-  static async get(id: number): Promise<LikeResponse> {
-    const getRequest = Validation.validate(LikeValidation.GET, { id });
-
-    const like = await prismaClient.like.findUnique({
+  static async getAllByPost(postId: number): Promise<LikeResponse[]> {
+    const likes = await prismaClient.like.findMany({
       where: {
-        id: getRequest.id,
+        postId,
       },
     });
 
-    if (!like) {
-      throw new ResponseError(404, "Like not found");
-    }
+    return likes.map((like) => LikeModel.toResponse(like));
+  }
 
-    return LikeModel.toResponse(like);
+  static async getAllByUser(userId: number): Promise<LikeResponse[]> {
+    const likes = await prismaClient.like.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    return likes.map((like) => LikeModel.toResponse(like));
   }
 }

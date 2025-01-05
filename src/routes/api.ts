@@ -11,18 +11,20 @@ api.post("/user", UserController.register);
 api.post("/community", CommunityController.create);
 
 //Post Routes
-api.post("/post", PostController.create);
-api.put("/post/:id", PostController.update);
-api.delete("/post/:id", PostController.delete);
-api.get("/post/:id", PostController.get);
-
-//Comment Routes
-api.post("/comment", CommentController.create);
-api.put("/comment/:id", CommentController.update);
-api.delete("/comment/:id", CommentController.delete);
-api.get("/comment/:id", CommentController.get);
+api.post("/posts", PostController.create);
+api.get("/posts/:id", PostController.get);
+api.get("/posts", PostController.getAll);
+api.put("/posts/:id", PostController.update);
+api.delete("/posts/:id", PostController.delete);
 
 //Like Routes
-api.post("/like", LikeController.create)
-api.delete("/like/:id", LikeController.delete)
-api.get("/like/:id", LikeController.get)
+api.post("/likes", LikeController.create)
+api.get("/likes/post/:id", LikeController.getAllByPost)
+api.get("/likes/user/:id", LikeController.getAllByUser)
+api.delete("/likes/:id", LikeController.delete)
+
+//Comment Routes
+api.post("/comments", CommentController.create);
+api.get("/comments/post/:id", CommentController.getAllByPost);
+api.put("/comments/:id", CommentController.update);
+api.delete("/comments/:id", CommentController.delete);

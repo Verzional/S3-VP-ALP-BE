@@ -46,4 +46,16 @@ export class PostController {
       next(error);
     }
   }
+
+  static async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await PostService.getAll();
+      res.json({
+        status: "success",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
