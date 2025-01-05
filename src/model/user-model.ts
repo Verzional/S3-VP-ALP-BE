@@ -62,10 +62,10 @@ export function toUserResponse(prismaUser: User): UserResponse {
     };
 }
 
-export async function getUserProfile(userId: number): Promise<UserProfile | null> {
+export async function getUserProfile(id: number): Promise<UserProfile | null> {
     try {
         const user = await prismaClient.user.findUnique({
-            where: { id: userId },
+            where: { id: id },
             include: {
                 friends: {
                     include: {
@@ -114,10 +114,10 @@ export async function getUserProfile(userId: number): Promise<UserProfile | null
     }
 }
 
-export async function createUserProfile(userId: number, avatar: string, bio: string): Promise<UserProfile | null> {
+export async function createUserProfile(id: number, avatar: string, bio: string): Promise<UserProfile | null> {
     try {
         const updatedUser = await prismaClient.user.update({
-            where: { id: userId },
+            where: { id: id },
             data: {
                 avatar,
                 bio,
@@ -169,10 +169,10 @@ export async function createUserProfile(userId: number, avatar: string, bio: str
 }
 
 
-export async function updateUserProfile(userId: number, updates: Partial<UserProfile>): Promise<UserProfile | null> {
+export async function updateUserProfile(id: number, updates: Partial<UserProfile>): Promise<UserProfile | null> {
     try {
         const updatedUser = await prismaClient.user.update({
-            where: { id: userId },
+            where: { id: id },
             data: {
                 username: updates.username,
                 email: updates.email,
@@ -225,10 +225,10 @@ export async function updateUserProfile(userId: number, updates: Partial<UserPro
     }
 }
 
-export async function deleteUserProfile(userId: number): Promise<boolean> {
+export async function deleteUserProfile(id: number): Promise<boolean> {
     try {
         await prismaClient.user.delete({
-            where: { id: userId },
+            where: { id: id },
         });
         return true;
     } catch (error) {

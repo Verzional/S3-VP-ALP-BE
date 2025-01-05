@@ -92,15 +92,15 @@ export class UserService {
         return "Logout Successful!"
     }
 
-    static async createUserProfile(userId: number, avatar: string, bio: string) {
-        const user = await prismaClient.user.findUnique({ where: { id: userId } });
+    static async createUserProfile(id: number, avatar: string, bio: string) {
+        const user = await prismaClient.user.findUnique({ where: { id: id } });
 
         if (!user) {
             throw new ResponseError(404, "User not found");
         }
 
         const updatedUser = await prismaClient.user.update({
-            where: { id: userId },
+            where: { id: id },
             data: { avatar, bio },
             include: {
                 friends: { include: { friend: true } },
@@ -136,9 +136,9 @@ export class UserService {
         };
     }
 
-    static async getUserProfile(userId: number) {
+    static async getUserProfile(id: number) {
         const user = await prismaClient.user.findUnique({
-            where: { id: userId },
+            where: { id: id },
             include: {
                 friends: { include: { friend: true } },
                 posts: true,
@@ -177,15 +177,15 @@ export class UserService {
         };
     }
 
-    static async updateUserProfile(userId: number, updates: Partial<User>) {
-        const user = await prismaClient.user.findUnique({ where: { id: userId } });
+    static async updateUserProfile(id: number, updates: Partial<User>) {
+        const user = await prismaClient.user.findUnique({ where: { id: id } });
 
         if (!user) {
             throw new ResponseError(404, "User not found");
         }
 
         const updatedUser = await prismaClient.user.update({
-            where: { id: userId },
+            where: { id: id },
             data: updates,
         });
 
@@ -200,14 +200,14 @@ export class UserService {
         };
     }
 
-    static async deleteUserProfile(userId: number): Promise<boolean> {
-        const user = await prismaClient.user.findUnique({ where: { id: userId } });
+    static async deleteUserProfile(id: number): Promise<boolean> {
+        const user = await prismaClient.user.findUnique({ where: { id: id } });
 
         if (!user) {
             throw new ResponseError(404, "User not found");
         }
 
-        await prismaClient.user.delete({ where: { id: userId } });
+        await prismaClient.user.delete({ where: { id: id } });
         return true;
     }
 

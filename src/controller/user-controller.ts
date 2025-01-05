@@ -54,9 +54,9 @@ export class UserController {
     }
 
     static async createUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { userId, avatar, bio } = req.body;
+        const { id, avatar, bio } = req.body;
 
-        if (!userId || typeof userId !== "number") {
+        if (!id || typeof id !== "number") {
          res.status(400).json({ error: "Invalid or missing userId" });
         }
 
@@ -69,7 +69,7 @@ export class UserController {
         }
 
         try {
-            const userProfile = await createUserProfile(userId, avatar, bio);
+            const userProfile = await createUserProfile(id, avatar, bio);
 
             if (!userProfile) {
                  res.status(404).json({ error: "User not found" });
@@ -87,8 +87,8 @@ export class UserController {
 
     static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = Number(req.params.userId);
-            const profile = await getUserProfile(userId);
+            const id = Number(req.params.id);
+            const profile = await getUserProfile(id);
 
             if (!profile) {
                 res.status(404).json({ message: "User not found" });
@@ -103,10 +103,10 @@ export class UserController {
 
     static async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = Number(req.params.userId);
+            const id = Number(req.params.id);
             const updates = req.body;
 
-            const updatedProfile = await updateUserProfile(userId, updates);
+            const updatedProfile = await updateUserProfile(id, updates);
 
             if (!updatedProfile) {
                 res.status(404).json({ message: "User not found" });
@@ -121,8 +121,8 @@ export class UserController {
 
     static async deleteProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = Number(req.params.userId);
-            const success = await deleteUserProfile(userId);
+            const id = Number(req.params.id);
+            const success = await deleteUserProfile(id);
 
             if (!success) {
                 res.status(404).json({ message: "User not found" });
