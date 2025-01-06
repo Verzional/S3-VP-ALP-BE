@@ -52,6 +52,7 @@ export class UserService {
         });
 
         return {
+            id: newUser.id,
             username: newUser.username,
             token,
         };
@@ -84,6 +85,7 @@ export class UserService {
         });
 
         return {
+            id: user.id,
             username: user.username,
             token,
         };

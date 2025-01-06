@@ -8,6 +8,7 @@ export interface RegisterUserRequest {
 }
 
 export interface UserResponse {
+    id: number,
     username: string;
     token?: string;
 }
@@ -36,6 +37,7 @@ export interface UserProfile {
 
 export function toUserResponse(prismaUser: User): UserResponse {
     return {
+        id: prismaUser.id,
         username: prismaUser.username,
         token: prismaUser.token ?? "",
     };
