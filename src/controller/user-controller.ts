@@ -1,26 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import { 
-    LoginUserRequest, 
     RegisterUserRequest, 
+    LoginUserRequest, 
     UserResponse, 
-    createUserProfile, 
-    getUserProfile, 
-    updateUserProfile, 
-    deleteUserProfile, 
-    addFriend, 
-    removeFriend 
+    UserProfile 
 } from "../model/user-model";
 import { UserService } from "../service/user-service";
-import { UserRequest } from "../type/user-request";
 
 export class UserController {
-    // Add explicit return type for async methods
+    // Register a new user
     static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const request: RegisterUserRequest = req.body as RegisterUserRequest;
+            const request: RegisterUserRequest = req.body;
             const response: UserResponse = await UserService.register(request);
 
-            res.status(200).json({
+            res.status(201).json({
+                message: "User registered successfully",
                 data: response,
             });
         } catch (error) {
@@ -28,12 +23,14 @@ export class UserController {
         }
     }
 
+    // Login a user
     static async login(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const request: LoginUserRequest = req.body as LoginUserRequest;
+            const request: LoginUserRequest = req.body;
             const response: UserResponse = await UserService.login(request);
 
             res.status(200).json({
+                message: "Login successful",
                 data: response,
             });
         } catch (error) {
@@ -41,131 +38,111 @@ export class UserController {
         }
     }
 
-    static async logout(req: UserRequest, res: Response, next: NextFunction): Promise<void> {
+    // Logout a user
+    static async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const response: string = await UserService.logout(req.user!);
+            const userId: number = req.body.userId; // Assuming userId is passed in the body
+            await UserService.logout(userId);
 
             res.status(200).json({
-                data: response,
+                message: "Logout successful",
             });
         } catch (error) {
             next(error);
         }
     }
 
-    static async createUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { id, avatar, bio } = req.body;
-
-        if (!id || typeof id !== "number") {
-         res.status(400).json({ error: "Invalid or missing userId" });
-        }
-
-        if (!avatar || typeof avatar !== "string") {
-        res.status(400).json({ error: "Invalid or missing avatar" });
-        }
-
-        if (!bio || typeof bio !== "string") {
-             res.status(400).json({ error: "Invalid or missing bio" });
-        }
-
+    // Get user profile
+    static async getUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userProfile = await createUserProfile(id, avatar, bio);
+            const id: number = parseInt(req.params.id);
 
-            if (!userProfile) {
-                 res.status(404).json({ error: "User not found" });
+            if (isNaN(id)) {
+                res.status(400).json({ message: "Invalid user ID" });
+                return;
             }
 
-             res.status(200).json({
-                message: "User profile created successfully",
+            const userProfile: UserProfile | null = await UserService.getUserProfile(id);
+
+            if (!userProfile) {
+                res.status(404).json({ message: "User not found" });
+                return;
+            }
+
+            res.status(200).json(userProfile);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Create or update user profile
+    static async createUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id, avatar, bio } = req.body;
+
+            if (!id || typeof id !== "number") {
+                res.status(400).json({ message: "Invalid or missing user ID" });
+                return;
+            }
+
+            const userProfile: UserProfile | null = await UserService.createUserProfile(id, avatar, bio);
+
+            res.status(200).json({
+                message: "User profile created/updated successfully",
                 data: userProfile,
             });
         } catch (error) {
-            console.error("Error in createUserProfileController:", error);
-             res.status(500).json({ error: "Internal Server Error" });
+            next(error);
         }
     }
 
-    static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    // Update user profile
+    static async updateUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = Number(req.params.id);
-            const profile = await getUserProfile(id);
+            const id: number = parseInt(req.params.id);
 
-            if (!profile) {
+            if (isNaN(id)) {
+                res.status(400).json({ message: "Invalid user ID" });
+                return;
+            }
+
+            const updates: Partial<UserProfile> = req.body;
+            const updatedUser: UserProfile | null = await UserService.updateUserProfile(id, updates);
+
+            if (!updatedUser) {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
 
-            res.status(200).json({ data: profile });
+            res.status(200).json({
+                message: "User profile updated successfully",
+                data: updatedUser,
+            });
         } catch (error) {
             next(error);
         }
     }
 
-    static async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    // Delete user profile
+    static async deleteUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const id = Number(req.params.id);
-            const updates = req.body;
+            const id: number = parseInt(req.params.id);
 
-            const updatedProfile = await updateUserProfile(id, updates);
-
-            if (!updatedProfile) {
-                res.status(404).json({ message: "User not found" });
+            if (isNaN(id)) {
+                res.status(400).json({ message: "Invalid user ID" });
                 return;
             }
 
-            res.status(200).json({ data: updatedProfile });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    static async deleteProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const id = Number(req.params.id);
-            const success = await deleteUserProfile(id);
+            const success: boolean = await UserService.deleteUserProfile(id);
 
             if (!success) {
                 res.status(404).json({ message: "User not found" });
                 return;
             }
 
-            res.status(200).json({ message: "User deleted successfully" });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    static async addFriend(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const userId = Number(req.params.userId);
-            const friendId = Number(req.body.friendId);
-
-            const success = await addFriend(userId, friendId);
-
-            if (!success) {
-                res.status(400).json({ message: "Unable to add friend" });
-                return;
-            }
-
-            res.status(200).json({ message: "Friend added successfully" });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    static async removeFriend(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const userId = Number(req.params.userId);
-            const friendId = Number(req.body.friendId);
-
-            const success = await removeFriend(userId, friendId);
-
-            if (!success) {
-                res.status(400).json({ message: "Unable to remove friend" });
-                return;
-            }
-
-            res.status(200).json({ message: "Friend removed successfully" });
+            res.status(200).json({
+                message: "User profile deleted successfully",
+            });
         } catch (error) {
             next(error);
         }

@@ -9,7 +9,7 @@ export interface RegisterUserRequest {
 
 export interface UserResponse {
     username: string;
-    token?: string
+    token?: string;
 }
 
 export interface LoginUserRequest {
@@ -31,57 +31,26 @@ export interface UserProfile {
     bio?: string;
     createdAt: Date;
     updatedAt: Date;
-    friends: Array<Friend>;
-    posts: Array<Post>;
-    communities: Array<Community>;
-}
-
-export interface Friend {
-    id: number;
-    username: string;
-    avatar?: string;
-}
-
-export interface Post {
-    id: number;
-    title: string;
-    content: string;
-    createdAt: Date;
-}
-
-export interface Community {
-    id: number;
-    name: string;
-    description?: string;
+    token?: string; // Make this consistent
 }
 
 export function toUserResponse(prismaUser: User): UserResponse {
     return {
         username: prismaUser.username,
-        token: prismaUser.token ?? ""
+        token: prismaUser.token ?? "",
     };
 }
 
 export async function getUserProfile(id: number): Promise<UserProfile | null> {
     try {
         const user = await prismaClient.user.findUnique({
-            where: { id: id },
-            include: {
-                friends: {
-                    include: {
-                        friend: true
-                    }
-                },
-                posts: true,
-                communities: {
-                    include: {
-                        community: true
-                    }
-                },
-            },
+            where: { id },
         });
 
         if (!user) return null;
+
+        // Assuming token is retrieved from another source if needed
+        const token = await getUserToken(user.id);
 
         return {
             id: user.id,
@@ -91,22 +60,7 @@ export async function getUserProfile(id: number): Promise<UserProfile | null> {
             bio: user.bio ?? undefined,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            friends: user.friends.map(friendship => ({
-                id: friendship.friend.id,
-                username: friendship.friend.username,
-                avatar: friendship.friend.avatar ?? undefined,
-            })),
-            posts: user.posts.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                createdAt: post.createdAt,
-            })),
-            communities: user.communities.map(communityUser => ({
-                id: communityUser.community.id,
-                name: communityUser.community.name,
-                description: communityUser.community.bio ?? undefined,
-            })),
+            token: token ?? undefined,
         };
     } catch (error) {
         console.error("Error retrieving user profile:", error);
@@ -114,27 +68,17 @@ export async function getUserProfile(id: number): Promise<UserProfile | null> {
     }
 }
 
+// Additional function to fetch user token if necessary
+async function getUserToken(userId: number): Promise<string | null> {
+    // Implement token retrieval logic as needed
+    return null; // Return null if no token
+}
+
 export async function createUserProfile(id: number, avatar: string, bio: string): Promise<UserProfile | null> {
     try {
         const updatedUser = await prismaClient.user.update({
-            where: { id: id },
-            data: {
-                avatar,
-                bio,
-            },
-            include: {
-                friends: {
-                    include: {
-                        friend: true
-                    }
-                },
-                posts: true,
-                communities: {
-                    include: {
-                        community: true
-                    }
-                },
-            },
+            where: { id },
+            data: { avatar, bio },
         });
 
         return {
@@ -145,22 +89,6 @@ export async function createUserProfile(id: number, avatar: string, bio: string)
             bio: updatedUser.bio ?? undefined,
             createdAt: updatedUser.createdAt,
             updatedAt: updatedUser.updatedAt,
-            friends: updatedUser.friends.map(friendship => ({
-                id: friendship.friend.id,
-                username: friendship.friend.username,
-                avatar: friendship.friend.avatar ?? undefined,
-            })),
-            posts: updatedUser.posts.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                createdAt: post.createdAt,
-            })),
-            communities: updatedUser.communities.map(communityUser => ({
-                id: communityUser.community.id,
-                name: communityUser.community.name,
-                description: communityUser.community.bio ?? undefined,
-            })),
         };
     } catch (error) {
         console.error("Error creating/updating user profile:", error);
@@ -168,29 +96,15 @@ export async function createUserProfile(id: number, avatar: string, bio: string)
     }
 }
 
-
 export async function updateUserProfile(id: number, updates: Partial<UserProfile>): Promise<UserProfile | null> {
     try {
         const updatedUser = await prismaClient.user.update({
-            where: { id: id },
+            where: { id },
             data: {
                 username: updates.username,
                 email: updates.email,
                 avatar: updates.avatar,
                 bio: updates.bio,
-            },
-            include: {
-                friends: {
-                    include: {
-                        friend: true
-                    }
-                },
-                posts: true,
-                communities: {
-                    include: {
-                        community: true
-                    }
-                },
             },
         });
 
@@ -202,22 +116,6 @@ export async function updateUserProfile(id: number, updates: Partial<UserProfile
             bio: updatedUser.bio ?? undefined,
             createdAt: updatedUser.createdAt,
             updatedAt: updatedUser.updatedAt,
-            friends: updatedUser.friends.map(friendship => ({
-                id: friendship.friend.id,
-                username: friendship.friend.username,
-                avatar: friendship.friend.avatar ?? undefined,
-            })),
-            posts: updatedUser.posts.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                createdAt: post.createdAt,
-            })),
-            communities: updatedUser.communities.map(communityUser => ({
-                id: communityUser.community.id,
-                name: communityUser.community.name,
-                description: communityUser.community.bio ?? undefined,
-            })),
         };
     } catch (error) {
         console.error("Error updating user profile:", error);
@@ -227,44 +125,10 @@ export async function updateUserProfile(id: number, updates: Partial<UserProfile
 
 export async function deleteUserProfile(id: number): Promise<boolean> {
     try {
-        await prismaClient.user.delete({
-            where: { id: id },
-        });
+        await prismaClient.user.delete({ where: { id } });
         return true;
     } catch (error) {
         console.error("Error deleting user profile:", error);
-        throw error;
-    }
-}
-
-export async function addFriend(userId: number, friendId: number): Promise<boolean> {
-    try {
-        await prismaClient.friendship.create({
-            data: {
-                userId,
-                friendId,
-            },
-        });
-        return true;
-    } catch (error) {
-        console.error("Error adding friend:", error);
-        throw error;
-    }
-}
-
-export async function removeFriend(userId: number, friendId: number): Promise<boolean> {
-    try {
-        await prismaClient.friendship.delete({
-            where: {
-                userId_friendId: {
-                    userId,
-                    friendId,
-                },
-            },
-        });
-        return true;
-    } catch (error) {
-        console.error("Error removing friend:", error);
         throw error;
     }
 }

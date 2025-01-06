@@ -1,248 +1,122 @@
 import { User } from "@prisma/client";
-import { prismaClient } from "../application/database"
-import { logger } from "../application/logging"
+import { prismaClient } from "../application/database";
+import { 
+    RegisterUserRequest, 
+    UserResponse, 
+    LoginUserRequest, 
+    UserProfile, 
+    getUserProfile, 
+    createUserProfile, 
+    updateUserProfile, 
+    deleteUserProfile 
+} from "../model/user-model";
 import bcrypt from "bcrypt";
-import { RegisterUserRequest, LoginUserRequest, UserResponse, toUserResponse } from "../model/user-model";
-import { Validation } from "../validation/validation";
-import { UserValidation } from "../validation/user-validation";
-import { ResponseError } from "../error/responseError";
-import { v4 as uuid } from "uuid"
+import { v4 as uuidv4 } from "uuid";
 
 export class UserService {
+    // Register a new user
     static async register(request: RegisterUserRequest): Promise<UserResponse> {
-        const validRequest = Validation.validate(
-            UserValidation.REGISTER,
-            request
-        );
-
+        // Check if the email or username already exists
         const existingUser = await prismaClient.user.findFirst({
             where: {
                 OR: [
-                    { email: validRequest.email },
-                    { username: validRequest.username },
+                    { email: request.email },
+                    { username: request.username },
                 ],
             },
         });
 
         if (existingUser) {
-            throw new ResponseError(400, "Email or username already exists");
+            throw new Error("Username or email already exists.");
         }
 
-        validRequest.password = await bcrypt.hash(validRequest.password, 10);
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(request.password, 10);
 
-        const user = await prismaClient.user.create({
+        // Create the user
+        const newUser = await prismaClient.user.create({
             data: {
-                username: validRequest.username,
-                email: validRequest.email,
-                password: validRequest.password,
-                token: uuid()
+                username: request.username,
+                email: request.email,
+                password: hashedPassword,
             },
         });
 
-        return toUserResponse(user);
+        // Generate session token
+        const token = uuidv4();
+
+        // Save the session token
+        await prismaClient.user.update({
+            where: { id: newUser.id },
+            data: { token },
+        });
+
+        return {
+            username: newUser.username,
+            token,
+        };
     }
 
+    // Login a user
     static async login(request: LoginUserRequest): Promise<UserResponse> {
-        const loginRequest = Validation.validate(UserValidation.LOGIN, request)
-
-        let user = await prismaClient.user.findFirst({
-            where: {
-                email: loginRequest.email,
-            },
-        })
-
-        if (!user) {
-            throw new ResponseError(400, "Invalid email or password!")
-        }
-
-        const passwordIsValid = await bcrypt.compare(
-            loginRequest.password,
-            user.password
-        )
-
-        if (!passwordIsValid) {
-            throw new ResponseError(400, "Invalid email or password!")
-        }
-
-        user = await prismaClient.user.update({
-            where: {
-                id: user.id,
-            },
-            data: {
-                token: uuid(),
-            },
-        })
-
-        const response = toUserResponse(user)
-
-        return response
-    }
-
-
-    static async logout(user: User): Promise<string> {
-        const result = await prismaClient.user.update({
-            where: {
-                id: user.id,
-            },
-            data: {
-                token: null,
-            },
-        })
-
-        return "Logout Successful!"
-    }
-
-    static async createUserProfile(id: number, avatar: string, bio: string) {
-        const user = await prismaClient.user.findUnique({ where: { id: id } });
-
-        if (!user) {
-            throw new ResponseError(404, "User not found");
-        }
-
-        const updatedUser = await prismaClient.user.update({
-            where: { id: id },
-            data: { avatar, bio },
-            include: {
-                friends: { include: { friend: true } },
-                posts: true,
-                communities: { include: { community: true } },
-            },
-        });
-
-        return {
-            id: updatedUser.id,
-            username: updatedUser.username,
-            email: updatedUser.email,
-            avatar: updatedUser.avatar || undefined,
-            bio: updatedUser.bio || undefined,
-            createdAt: updatedUser.createdAt,
-            updatedAt: updatedUser.updatedAt,
-            friends: updatedUser.friends.map(friendship => ({
-                id: friendship.friend.id,
-                username: friendship.friend.username,
-                avatar: friendship.friend.avatar || undefined,
-            })),
-            posts: updatedUser.posts.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                createdAt: post.createdAt,
-            })),
-            communities: updatedUser.communities.map(communityUser => ({
-                id: communityUser.community.id,
-                name: communityUser.community.name,
-                description: communityUser.community.bio || undefined,
-            })),
-        };
-    }
-
-    static async getUserProfile(id: number) {
+        // Find user by email
         const user = await prismaClient.user.findUnique({
-            where: { id: id },
-            include: {
-                friends: { include: { friend: true } },
-                posts: true,
-                communities: { include: { community: true } },
-            },
+            where: { email: request.email },
         });
 
         if (!user) {
-            throw new ResponseError(404, "User not found");
+            throw new Error("Invalid email or password.");
         }
 
+        // Compare the password
+        const isPasswordValid = await bcrypt.compare(request.password, user.password);
+        if (!isPasswordValid) {
+            throw new Error("Invalid email or password.");
+        }
+
+        // Generate new session token
+        const token = uuidv4();
+
+        // Update session token in the database
+        await prismaClient.user.update({
+            where: { id: user.id },
+            data: { token },
+        });
+
         return {
-            id: user.id,
             username: user.username,
-            email: user.email,
-            avatar: user.avatar || undefined,
-            bio: user.bio || undefined,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            friends: user.friends.map(friendship => ({
-                id: friendship.friend.id,
-                username: friendship.friend.username,
-                avatar: friendship.friend.avatar || undefined,
-            })),
-            posts: user.posts.map(post => ({
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                createdAt: post.createdAt,
-            })),
-            communities: user.communities.map(communityUser => ({
-                id: communityUser.community.id,
-                name: communityUser.community.name,
-                description: communityUser.community.bio || undefined,
-            })),
+            token,
         };
     }
 
-    static async updateUserProfile(id: number, updates: Partial<User>) {
-        const user = await prismaClient.user.findUnique({ where: { id: id } });
-
-        if (!user) {
-            throw new ResponseError(404, "User not found");
-        }
-
-        const updatedUser = await prismaClient.user.update({
-            where: { id: id },
-            data: updates,
+    // Logout a user
+    static async logout(userId: number): Promise<string> {
+        // Clear the session token from the database
+        await prismaClient.user.update({
+            where: { id: userId },
+            data: { token: null },
         });
 
-        return {
-            id: updatedUser.id,
-            username: updatedUser.username,
-            email: updatedUser.email,
-            avatar: updatedUser.avatar || undefined,
-            bio: updatedUser.bio || undefined,
-            createdAt: updatedUser.createdAt,
-            updatedAt: updatedUser.updatedAt,
-        };
+        return "Logout successful.";
     }
 
+    // Get user profile
+    static async getUserProfile(id: number): Promise<UserProfile | null> {
+        return await getUserProfile(id);
+    }
+
+    // Create or update user profile
+    static async createUserProfile(id: number, avatar: string, bio: string): Promise<UserProfile | null> {
+        return await createUserProfile(id, avatar, bio);
+    }
+
+    // Update user profile
+    static async updateUserProfile(id: number, updates: Partial<UserProfile>): Promise<UserProfile | null> {
+        return await updateUserProfile(id, updates);
+    }
+
+    // Delete user profile
     static async deleteUserProfile(id: number): Promise<boolean> {
-        const user = await prismaClient.user.findUnique({ where: { id: id } });
-
-        if (!user) {
-            throw new ResponseError(404, "User not found");
-        }
-
-        await prismaClient.user.delete({ where: { id: id } });
-        return true;
-    }
-
-    static async addFriend(userId: number, friendId: number): Promise<boolean> {
-        const user = await prismaClient.user.findUnique({ where: { id: userId } });
-        const friend = await prismaClient.user.findUnique({ where: { id: friendId } });
-
-        if (!user || !friend) {
-            throw new ResponseError(404, "User or Friend not found");
-        }
-
-        await prismaClient.friendship.create({
-            data: {
-                userId,
-                friendId,
-            },
-        });
-
-        return true;
-    }
-
-    static async removeFriend(userId: number, friendId: number): Promise<boolean> {
-        const friendship = await prismaClient.friendship.findFirst({
-            where: {
-                userId,
-                friendId,
-            },
-        });
-
-        if (!friendship) {
-            throw new ResponseError(404, "Friendship not found");
-        }
-
-        await prismaClient.friendship.delete({ where: { id: friendship.id } });
-        return true;
+        return await deleteUserProfile(id);
     }
 }
-
