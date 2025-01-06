@@ -41,7 +41,10 @@ export class PostService {
     return PostModel.toResponse(post);
   }
 
-  static async update(id: number, request: CreatePostRequest): Promise<PostResponse> {
+  static async update(
+    id: number,
+    request: CreatePostRequest
+  ): Promise<PostResponse> {
     const updateRequest = Validation.validate(PostValidation.UPDATE, request);
 
     const post = await prismaClient.post.findUnique({

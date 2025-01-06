@@ -18,10 +18,10 @@ api.put("/posts/:id", PostController.update);
 api.delete("/posts/:id", PostController.delete);
 
 //Like Routes
-api.post("/likes", LikeController.create)
-api.get("/likes/post/:id", LikeController.getAllByPost)
-api.get("/likes/user/:id", LikeController.getAllByUser)
-api.delete("/likes/:id", LikeController.delete)
+api.post("/likes", LikeController.create);
+api.get("/likes/post/:id", LikeController.getAllByPost);
+api.get("/likes/user/:id", LikeController.getAllByUser);
+api.delete("/likes/:id", LikeController.delete);
 
 //Comment Routes
 api.post("/comments", CommentController.create);
