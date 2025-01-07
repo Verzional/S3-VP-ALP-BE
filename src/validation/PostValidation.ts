@@ -4,7 +4,7 @@ export class PostValidation {
   static readonly CREATE: ZodType = z.object({
     title: z.string().min(1).max(255),
     content: z.string().min(1).max(255),
-    imageUrl: z.string().url().optional(),
+    imageUrl: z.string().optional(),
     userId: z.number().int().positive(),
     communityId: z.number().int().positive(),
   });
