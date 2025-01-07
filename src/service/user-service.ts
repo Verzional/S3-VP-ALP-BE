@@ -92,10 +92,10 @@ export class UserService {
     }
 
     // Logout a user
-    static async logout(userId: number): Promise<string> {
+    static async logout(id: number): Promise<string> {
         // Clear the session token from the database
         await prismaClient.user.update({
-            where: { id: userId },
+            where: { id: id },
             data: { token: null },
         });
 
