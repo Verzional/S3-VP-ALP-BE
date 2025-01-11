@@ -93,7 +93,19 @@ export class UserService {
 
     // Logout a user
     static async logout(id: number): Promise<string> {
+        if (!id || isNaN(id)) {
+            throw new Error("Invalid ID: A valid user ID is required for logout.");
+        }
+
         // Clear the session token from the database
+        const user = await prismaClient.user.findUnique({
+            where: { id: id },
+        });
+
+        if (!user) {
+            throw new Error(`User not found with ID: ${id}`);
+        }
+
         await prismaClient.user.update({
             where: { id: id },
             data: { token: null },

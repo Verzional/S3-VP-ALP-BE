@@ -55,26 +55,41 @@ export class UserController {
     // Get user profile
     static async getUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            // Log the incoming request parameters
+            console.log("getUserProfile called with params:", req.params);
+    
             const id: number = parseInt(req.params.id);
-
+    
+            // Log the parsed user ID
+            console.log("Parsed user ID:", id);
+    
             if (isNaN(id)) {
+                console.error("Invalid user ID:", req.params.id);
                 res.status(400).json({ message: "Invalid user ID" });
                 return;
             }
-
+    
+            // Call the service to get the user profile
             const userProfile: UserProfile | null = await UserService.getUserProfile(id);
-
+    
+            // Log the result from the service
             if (!userProfile) {
+                console.warn(`User not found for ID: ${id}`);
                 res.status(404).json({ message: "User not found" });
                 return;
             }
-
+    
+            console.log("User profile retrieved successfully:", userProfile);
+    
+            // Respond with the retrieved user profile
             res.status(200).json(userProfile);
         } catch (error) {
+            // Log the error before passing it to the error handler
+            console.error("Error in getUserProfile:", error);
             next(error);
         }
     }
-
+    
     // Create or update user profile
     static async createUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
