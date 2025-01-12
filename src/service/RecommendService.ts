@@ -1,4 +1,6 @@
+import { prismaClient } from '../application/database';
 import { CommunityModel } from '../model/CommunityModel';
+import { LikeModel } from '../model/LikeModel';
 
 class RecommendService {
     async getPopularCommunities(limit: number = 7): Promise<CommunityModel[]> {
@@ -13,6 +15,26 @@ class RecommendService {
             throw new Error('Could not fetch popular communities');
         }
     }
+
+    static async getMostLikedPosts(limit: number = 7): Promise<{ postId: number; totalLikes: number }[]> {
+        const posts = await prismaClient.like.groupBy({
+          by: ['postId'],
+          _count: {
+            postId: true,
+          },
+          orderBy: {
+            _count: {
+              postId: 'desc',
+            },
+          },
+          take: limit,
+        });
+    
+        return posts.map(post => ({
+          postId: post.postId,
+          totalLikes: post._count.postId,
+        }));
+      }
     
 }
 
