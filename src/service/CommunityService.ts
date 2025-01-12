@@ -1,38 +1,44 @@
-import { prismaClient } from "../application/database";
-import { ResponseError } from "../error/ResponseError";
-import { Validation } from "../validation/Validation";
-import { CommunityValidation } from "../validation/CommunityValidation";
-import {
-  CommunityModel,
-  CommunityResponse,
-  CreateCommunityRequest,
-} from "../model/CommunityModel";
+// CommunityService.js
+import { CommunityModel } from "../model/CommunityModel";
 
 export class CommunityService {
-  static async create(
-    request: CreateCommunityRequest
-  ): Promise<CommunityResponse> {
-    const createRequest = Validation.validate(
-      CommunityValidation.CREATE,
-      request
-    );
-
-    const existingCommunity = await prismaClient.community.findFirst({
-      where: {
-        name: createRequest.name,
-      },
-    });
-
-    if (existingCommunity) {
-      throw new ResponseError(400, "Community already exists");
+  static async getCommunityById(id: any) {
+    const community = await CommunityModel.findById(id);
+    if (!community) {
+      throw new Error('Community not found');
     }
-
-    const community = await prismaClient.community.create({
-      data: {
-        name: createRequest.name,
-      },
-    });
-
     return CommunityModel.toResponse(community);
+  }
+
+  static async getCommunitiesByTag(tagId: any) {
+    const communities = await CommunityModel.findAllByTag(tagId);
+    return communities.map(CommunityModel.toResponse);
+  }
+
+  static async createCommunity(data: { name: any; avatar: any; bio: any; tags: any; }) {
+    const { name, avatar, bio, tags } = data;
+    if (!name || !tags || tags.length === 0) {
+      throw new Error('Name and at least one tag are required');
+    }
+    const community = await CommunityModel.create({ name, avatar, bio, tags });
+    return CommunityModel.toResponse(community);
+  }
+
+  static async updateCommunity(id: any, data: any) {
+    const community = await CommunityModel.findById(id);
+    if (!community) {
+      throw new Error('Community not found');
+    }
+    const updatedCommunity = await CommunityModel.update(id, data);
+    return CommunityModel.toResponse(updatedCommunity);
+  }
+
+  static async deleteCommunity(id: any) {
+    const community = await CommunityModel.findById(id);
+    if (!community) {
+      throw new Error('Community not found');
+    }
+    await CommunityModel.delete(id);
+    return { message: 'Community deleted successfully' };
   }
 }
