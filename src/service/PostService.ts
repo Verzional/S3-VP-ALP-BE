@@ -1,5 +1,5 @@
-import { prismaClient } from "../application/Database";
-import { ResponseError } from "../error/responseError";
+import { prismaClient } from "../application/database";
+import { ResponseError } from "../error/ResponseError";
 import { Validation } from "../validation/Validation";
 import { PostValidation } from "../validation/PostValidation";
 import { PostModel, PostResponse, CreatePostRequest } from "../model/PostModel";

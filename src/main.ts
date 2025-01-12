@@ -1,5 +1,5 @@
-import app from "./application/App";
-import { logger } from "./application/Logging";
+import app from "./application/app";
+import { logger } from "./application/logging";
 
 const PORT = 3000;
 
