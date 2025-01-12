@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import { Request } from "express";
-import { ResponseError } from "../error/ResponseError";
+import { ResponseError } from "../error/responseError";
 
 // Create uploads directory if it doesn't exist
 const createUploadsDir = async () => {
