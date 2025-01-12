@@ -1,5 +1,5 @@
 import express from "express";
-import { UserController } from "../controller/UserController";
+import { UserController } from "../controller/user-controller";  
 import { PostController } from "../controller/PostController";
 import { CommunityController } from "../controller/CommunityController";
 import { CommentController } from "../controller/CommentController";
@@ -8,8 +8,14 @@ import { uploadPostImage } from "../middleware/MulterMiddleware";
 
 export const api = express.Router();
 
-api.post("/user", UserController.register);
-api.post("/community", CommunityController.create);
+//User Routes
+api.post("/register", UserController.register);
+api.post("/login", UserController.login);
+api.post("/logout", UserController.logout);
+api.post("/profile/:id", UserController.createUserProfile);
+api.get("/profile/:id", UserController.getUserProfile);
+api.put("/updateProfile/:id", UserController.updateUserProfile);
+api.delete("/deleteProfile/:id", UserController.deleteUserProfile)
 
 //Post Routes
 api.post("/posts", uploadPostImage, PostController.create);
