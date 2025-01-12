@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import { prismaClient } from "../application/Database";
-import { logger } from "../application/Logging";
+import { logger } from "../application/logging";
 import bcrypt from "bcrypt";
 import {
   RegisterUserRequest,
@@ -10,7 +10,7 @@ import {
 } from "../model/UserModel";
 import { Validation } from "../validation/Validation";
 import { UserValidation } from "../validation/UserValidation";
-import { ResponseError } from "../error/ResponseError";
+import { ResponseError } from "../error/responseError";
 
 export class UserService {
   static async register(request: RegisterUserRequest): Promise<UserResponse> {

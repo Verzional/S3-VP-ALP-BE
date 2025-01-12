@@ -1,5 +1,5 @@
 import { prismaClient } from "../application/Database";
-import { ResponseError } from "../error/ResponseError";
+import { ResponseError } from "../error/responseError";
 import { Validation } from "../validation/Validation";
 import { CommentValidation } from "../validation/CommentValidation";
 import {
