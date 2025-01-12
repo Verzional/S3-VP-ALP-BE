@@ -145,5 +145,35 @@ export class CommunityModel {
       },
     });
   }
+
+  // Mendapatkan semua komunitas
+  
+static async findAll(options: { order: any; limit: number }) {
+
+  return prismaClient.community.findMany({
+
+    orderBy: options.order,
+
+    take: options.limit,
+
+    include: {
+
+      communityTags: {
+
+        include: {
+
+          tag: true, // Sertakan detail tag
+
+        },
+
+      },
+
+    },
+
+  });
+
 }
+
+}
+
 
