@@ -20,7 +20,7 @@ export class CommunityService {
     if (!name || !tags || tags.length === 0) {
       throw new Error('Name and at least one tag are required');
     }
-    const community = await CommunityModel.create({ name, avatar, bio, tags });
+    const community = await CommunityModel.create({ name, tags });
     return CommunityModel.toResponse(community);
   }
 
