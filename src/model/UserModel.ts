@@ -280,3 +280,51 @@ export async function removeFriend(
     throw error;
   }
 }
+export async function getAllUsers(): Promise<UserProfile[]> {
+  try {
+    const users = await prismaClient.user.findMany({
+      include: {
+        friends: {
+          include: {
+            friend: true,
+          },
+        },
+        posts: true,
+        communities: {
+          include: {
+            community: true,
+          },
+        },
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar ?? undefined,
+      bio: user.bio ?? undefined,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      friends: user.friends.map((friendship) => ({
+        id: friendship.friend.id,
+        username: friendship.friend.username,
+        avatar: friendship.friend.avatar ?? undefined,
+      })),
+      posts: user.posts.map((post) => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        createdAt: post.createdAt,
+      })),
+      communities: user.communities.map((communityUser) => ({
+        id: communityUser.community.id,
+        name: communityUser.community.name,
+        description: communityUser.community.bio ?? undefined,
+      })),
+    }));
+  } catch (error) {
+    console.error("Error retrieving all users:", error);
+    throw error;
+  }
+}
