@@ -126,5 +126,24 @@ export class CommunityModel {
       where: { id },
     });
   }
+
+  // Mendapatkan semua komunitas berdasarkan nama
+  static async findAllByName(name: string) {
+    return prismaClient.community.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive', // Pencarian tidak case-sensitive
+        },
+      },
+      include: {
+        communityTags: {
+          include: {
+            tag: true, // Sertakan detail tag
+          },
+        },
+      },
+    });
+  }
 }
 

@@ -16,7 +16,8 @@ class SearchServices {
 
     async findCommunityByName(name: string): Promise<CommunityModel | null> {
         try {
-            const community = await CommunityModel.findOne({ name });
+            const communities = await CommunityModel.findAllByName(name);
+            const community = communities.find(community => community.name === name) || null;
             return community;
         } catch (error) {
             console.error('Error finding community by name:', error);
