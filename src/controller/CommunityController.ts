@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { CommunityService } from "../service/CommunityService";
 
 export class CommunityController {
-
   static async create(req: Request, res: Response, next: NextFunction) {
     try {
       const result = await CommunityService.createCommunity(req.body); // Memanggil service untuk membuat komunitas
