@@ -45,6 +45,6 @@ api.put('/:id', CommunityController.update);
 api.delete('/:id', CommunityController.delete);
 
 //Friendship Routes
-api.post("/follow", FriendshipController.addFriend);
-api.post("/unfollow", FriendshipController.removeFriend);
-api.get("/:userId/friends", FriendshipController.getFriends);
+// api.post("/follow", FriendshipController.addFriend);
+// api.post("/unfollow", FriendshipController.removeFriend);
+// api.get("/:userId/friends", FriendshipController.getFriends);

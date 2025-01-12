@@ -2,7 +2,7 @@ import path from "path";
 import { cleanupFile } from "../middleware/MulterMiddleware";
 import { Request, Response, NextFunction } from "express";
 import { PostService } from "../service/PostService";
-import { ResponseError } from "../error/ResponseError";
+import { ResponseError } from "../error/responseError";
 
 export class PostController {
   static async create(req: Request, res: Response, next: NextFunction) {
