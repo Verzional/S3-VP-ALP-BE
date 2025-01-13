@@ -41,4 +41,12 @@ export class CommunityService {
     await CommunityModel.delete(id);
     return { message: 'Community deleted successfully' };
   }
+
+  static async getCommunityByName(name: any) {
+    const communities = await CommunityModel.findAllByName(name);
+    if (!communities || communities.length === 0) {
+      throw new Error('Community not found');
+    }
+    return communities.map(CommunityModel.toResponse);
+  }
 }

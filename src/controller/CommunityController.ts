@@ -65,4 +65,17 @@ export class CommunityController {
       next(error);
     }
   }
+
+  static async findByName(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name } = req.params; // Ambil nama dari URL
+      const result = await CommunityService.getCommunityByName(name); // Memanggil service untuk mendapatkan komunitas berdasarkan nama
+      res.status(200).json({
+        status: "success",
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

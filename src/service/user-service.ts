@@ -133,4 +133,16 @@ export class UserService {
     static async deleteUserProfile(id: number): Promise<boolean> {
         return await deleteUserProfile(id);
     }
+
+    // Get all users in the application
+    static async getAllUsers(): Promise<User[]> {
+        return await prismaClient.user.findMany();
+    }
+
+    // Get user by username
+    static async getUserByUsername(username: string): Promise<User | null> {
+        return await prismaClient.user.findUnique({
+            where: { username },
+        });
+    }
 }

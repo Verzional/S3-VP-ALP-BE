@@ -162,4 +162,44 @@ export class UserController {
             next(error);
         }
     }
+
+    // Get all users
+    static async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const users: UserProfile[] = await UserService.getAllUsers();
+
+            res.status(200).json({
+                message: "Users retrieved successfully",
+                data: users,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Find user by username
+    static async findUserByUsername(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const username: string = req.params.username;
+
+            if (!username) {
+                res.status(400).json({ message: "Username is required" });
+                return;
+            }
+
+            const user: UserProfile | null = await UserService.getUserByUsername(username);
+
+            if (!user) {
+                res.status(404).json({ message: "User not found" });
+                return;
+            }
+
+            res.status(200).json({
+                message: "User retrieved successfully",
+                data: user,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

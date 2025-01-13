@@ -6,6 +6,7 @@ import { FriendshipController } from "../controller/FriendshipController";
 import { CommentController } from "../controller/CommentController";
 import { LikeController } from "../controller/LikeController";
 import { uploadPostImage } from "../middleware/MulterMiddleware";
+import SearchServices from "../service/SearchServices";
 
 export const api = express.Router();
 
@@ -48,3 +49,8 @@ api.delete('/:id', CommunityController.delete);
 // api.post("/follow", FriendshipController.addFriend);
 // api.post("/unfollow", FriendshipController.removeFriend);
 // api.get("/:userId/friends", FriendshipController.getFriends);
+
+//Search Routes
+api.get("/search", UserController.getAllUsers);
+api.get("/search/:username", UserController.findUserByUsername);
+api.get("/search/community/:name", CommunityController.findByName);
